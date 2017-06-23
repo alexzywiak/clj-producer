@@ -1,7 +1,10 @@
 (ns clj-producer.core
   (:gen-class)
   (:require [org.httpkit.server :refer :all]
-            [clj-producer.producer :as producer]))
+            [clj-producer.producer :as producer])
+  (:import [java.net InetAddress]))
+
+(def host-name (.getHostName (. InetAddress getLocalHost)))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -10,9 +13,7 @@
     (with-channel req channel
       (on-close channel (fn [status]
                           (println "channel closed")))
-      (if (websocket? channel)
-        (println "WebSocket channel")
-        (println "HTTP channel"))
       (on-receive channel (fn [data]
+                            (println host-name)
                             (producer/broadcast data)))))
   (run-server handler {:port 8090}))
